@@ -143,13 +143,13 @@ const Auth = () => {
 
     return (
         <div className="min-h-screen flex flex-col items-center justify-center p-10">
-            <div className=" fixed top-3">
+            <div className="flex flex-col justify-start sm:fixed sm:top-3">
                 <h1 className="text-6xl font-bold text-[#282828] text-center">
                     fin-man
                 </h1>
             </div>
 
-            <div className="w-full max-w-sm mt-20">
+            <div className="w-full max-w-sm mt-18">
                 <div className="bg-[#282828] rounded-2xl p-8 border border-gray-700">
                     <div className="flex justify-center mb-4">
                         <div className="flex bg-transparent rounded-lg p-1">
