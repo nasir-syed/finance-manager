@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import { MoreHorizontal, Plus } from 'lucide-react'
 import Form from '../Utils/Form'
 import AlertDialog from '../Utils/AlertDialog'
+import ExpandedAsset from './ExpandedAsset' 
 import { userAuth } from '../../context/AuthContext'
 import { fetchAssets, addAsset, updateAsset, deleteAsset } from '../Utils/Operations'
 import LoadingAnimation from '../Utils/LoadingAnimation'
@@ -13,6 +14,8 @@ const AssetsTable = () => {
   const [editingAsset, setEditingAsset] = useState(null)
   const [isEditing, setIsEditing] = useState(false)
   const [deleteDialog, setDeleteDialog] = useState({ isOpen: false, assetId: null })
+  const [expandedAsset, setExpandedAsset] = useState(null) 
+  const [isExpandedAssetOpen, setIsExpandedAssetOpen] = useState(false) 
   const [assets, setAssets] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -79,7 +82,7 @@ const AssetsTable = () => {
     const rect = buttonElement.getBoundingClientRect()
     const viewportHeight = window.innerHeight
     const viewportWidth = window.innerWidth
-    const menuHeight = 90
+    const menuHeight = 120 
     const menuWidth = 120
 
     const spaceBelow = viewportHeight - rect.bottom
@@ -111,6 +114,10 @@ const AssetsTable = () => {
       setIsFormOpen(true)
     } else if (action === 'delete') {
       setDeleteDialog({ isOpen: true, assetId })
+    } else if (action === 'view') {
+      const asset = assets.find(a => a.id === assetId)
+      setExpandedAsset(asset)
+      setIsExpandedAssetOpen(true) 
     }
   }
 
@@ -181,6 +188,58 @@ const AssetsTable = () => {
     setIsFormOpen(false)
     setEditingAsset(null)
     setIsEditing(false)
+  }
+
+  const handleExpandedAssetClose = () => {
+    setIsExpandedAssetOpen(false)
+    setExpandedAsset(null)
+  }
+
+  const handleExpandedAssetSave = async (updatedAsset) => {
+    if (!session?.user?.id) {
+      setError('User not authenticated')
+      return
+    }
+
+    try {
+      const result = await updateAsset(updatedAsset.id, updatedAsset, session.user.id)
+
+      if (result.success) {
+        setAssets(prev =>
+          prev.map(a => a.id === updatedAsset.id ? result.data : a)
+        )
+        setExpandedAsset(result.data) 
+      } else {
+        setError(result.error)
+        console.error('Failed to update asset:', result.error)
+      }
+    } catch (err) {
+      setError('Failed to update asset')
+      console.error('Error updating asset:', err)
+    }
+  }
+
+  const handleExpandedAssetDelete = async (assetToDelete) => {
+    if (!session?.user?.id) {
+      setError('User not authenticated')
+      return
+    }
+
+    try {
+      const result = await deleteAsset(assetToDelete.id, session.user.id)
+
+      if (result.success) {
+        setAssets(prev => prev.filter(a => a.id !== assetToDelete.id))
+        setIsExpandedAssetOpen(false)
+        setExpandedAsset(null)
+      } else {
+        setError(result.error)
+        console.error('Failed to delete asset:', result.error)
+      }
+    } catch (err) {
+      setError('Failed to delete asset')
+      console.error('Error deleting asset:', err)
+    }
   }
 
   const formatAmount = (amount, currency) => {
@@ -285,8 +344,14 @@ const AssetsTable = () => {
                         }}
                       >
                         <button
-                          onClick={() => handleActionClick(asset.id, 'edit')}
+                          onClick={() => handleActionClick(asset.id, 'view')}
                           className="w-full px-4 py-2 text-left text-[#f8f9fa] hover:bg-[#333] transition-colors duration-200 rounded-t-lg text-sm"
+                        >
+                          View
+                        </button>
+                        <button
+                          onClick={() => handleActionClick(asset.id, 'edit')}
+                          className="w-full px-4 py-2 text-left text-[#f8f9fa] hover:bg-[#333] transition-colors duration-200 text-sm"
                         >
                           Edit
                         </button>
@@ -331,6 +396,15 @@ const AssetsTable = () => {
         formType="asset"
         data={editingAsset}
         isEditing={isEditing}
+        isViewOnly={!isEditing && editingAsset}
+      />
+
+      <ExpandedAsset
+        isOpen={isExpandedAssetOpen}
+        onClose={handleExpandedAssetClose}
+        asset={expandedAsset}
+        onSave={handleExpandedAssetSave}
+        onDelete={handleExpandedAssetDelete}
       />
 
       <AlertDialog

@@ -54,11 +54,12 @@ const Form = ({
     },
     asset: {
       title: 'Asset',
-      fields: ['name', 'currency', 'amount'],
+      fields: ['name', 'currency', 'amount', 'notes'],
       initialData: {
         name: '',
         currency: 'AED',
-        amount: ''
+        amount: '',
+        notes: ''
       }
     }
   };
@@ -96,7 +97,8 @@ const Form = ({
             id: data.id,
             name: data.name || '',
             currency: data.currency || 'AED',
-            amount: data.amount ? data.amount.toString() : ''
+            amount: data.amount ? data.amount.toString() : '',
+            notes: data.notes || ''
           });
         } else if (formType === 'transaction') {
           setFormData({
@@ -376,6 +378,21 @@ const Form = ({
           </div>
         );
 
+      case 'notes':
+        return (
+          <div>
+            <label htmlFor="notes" className="block text-md font-medium text-white mb-2">Notes</label>
+            <textarea
+              {...commonInputProps}
+              rows={4}
+              placeholder="Add any additional notes about this asset..."
+              className={`${commonInputProps.className} resize-none`}
+              maxLength={1000}
+            />
+            {errors.notes && <p className="text-red-500 text-sm mt-1 animate-shake">{errors.notes}</p>}
+          </div>
+        );
+
       case 'category':
         return (
           <div>
@@ -473,7 +490,7 @@ const Form = ({
       case 'currency':
         return (
           <div>
-            <label htmlFor="currency" className="block text-md font-medium text-white mb-2">Currency</label>
+            <label htmlFor="currency" className="block text-md font-medium text-white mb-2 mt-2">Currency</label>
             <div className="relative currency-dropdown">
               <button
                 type="button"
@@ -510,11 +527,11 @@ const Form = ({
 
         return (
           <div>
-            <label htmlFor="amount" className="block text-md font-medium text-white mb-2">
+            <label htmlFor="amount" className="block text-md font-medium text-white mt-2 mb-2">
               {isAssetForm ? 'Asset Value' : isBudgetForm ? 'Budget Amount' : 'Amount'}
             </label>
             <div className="relative">
-              <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm">
+              <span className="absolute left-4 top-5.25 transform -translate-y-1/2 text-gray-400 text-sm">
                 {currencySymbol}
               </span>
               <input
@@ -523,7 +540,7 @@ const Form = ({
                 step="0.01"
                 min="0"
                 placeholder="0.00"
-                className="w-full pl-12 pr-4 py-2 bg-[#282828] border border-[#505050] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent"
+                className="w-full pl-12 pr-4 py-2 mb-2 bg-[#282828] border border-[#505050] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent"
               />
             </div>
             {errors.amount && <p className="text-red-500 text-sm mt-1 animate-shake">{errors.amount}</p>}
@@ -565,7 +582,7 @@ const Form = ({
             </button>
           </div>
 
-          <form className={`space-y-${formType === 'note' ? '6' : '4'}`} onSubmit={handleSubmit}>
+          <form className={`space-y-${formType === 'note' || formType === 'asset' ? '6' : '4'}`} onSubmit={handleSubmit}>
             {config.fields.map((field) => (
               <div key={field}>
                 {renderField(field)}
@@ -581,7 +598,7 @@ const Form = ({
 
             <button
               type="submit"
-              className={`w-full mt-${formType === 'note' ? '6' : '4'} bg-[#f8f9fa] hover:bg-gray-200 text-gray-900 font-medium py-2 px-4 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-[1.02] active:scale-[0.98] ${loading ? 'animate-pulse' : ''
+              className={`w-full mt-${formType === 'note' || formType === 'asset' ? '6' : '4'} bg-[#f8f9fa] hover:bg-gray-200 text-gray-900 font-medium py-2 px-4 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-[1.02] active:scale-[0.98] ${loading ? 'animate-pulse' : ''
                 }`}
               disabled={loading}
             >

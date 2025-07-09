@@ -32,6 +32,7 @@ export const addAsset = async (assetData, userId) => {
       .insert([{
         user_id: userId,
         name: assetData.name,
+        notes: assetData.notes || '',
         amount: assetData.amount,
         currency: assetData.currency
       }])
@@ -57,6 +58,7 @@ export const updateAsset = async (assetId, assetData, userId) => {
       .from('assets')
       .update({
         name: assetData.name,
+        notes: assetData.notes || '',
         amount: assetData.amount,
         currency: assetData.currency,
         updated_at: new Date().toISOString()
